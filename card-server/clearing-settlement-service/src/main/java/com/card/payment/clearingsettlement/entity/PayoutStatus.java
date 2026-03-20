@@ -1,8 +1,7 @@
 package com.card.payment.clearingsettlement.entity;
 
-public enum SettlementStatus {
-    PENDING,
-    CALCULATED,
+public enum PayoutStatus {
+    REQUESTED,
     PAID,
     FAILED
 }
