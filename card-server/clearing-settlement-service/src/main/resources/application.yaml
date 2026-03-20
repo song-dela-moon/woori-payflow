@@ -4,44 +4,8 @@ spring:
   config:
     import: optional:configserver:http://localhost:8888
 
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
-
-  cloud:
-    stream:
-      default-binder: kafka
-      function:
-        definition: paymentApproved
-      bindings:
-        paymentApproved-in-0:
-          destination: card.payment.approved
-          group: clearing-settlement-group
-          content-type: application/json
-      kafka:
-        binder:
-          brokers: localhost:9092
-
-server:
-  port: 9091
-
-logging:
-  level:
-    com.card.payment: DEBUG
-
-bank:
-  service:
-    url: http://localhost:8086
-  settlement:
-    from-account: 9999999999
+# 로컬 테스트용 최소 설정 (Config Server를 못 찾을 경우 대비)
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

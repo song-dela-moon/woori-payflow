@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: clearing-settlement-service
+
   datasource:
     url: jdbc:mysql://localhost:3306/card_authorization_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
@@ -16,6 +19,7 @@ spring:
 
   cloud:
     stream:
+      default-binder: kafka
       function:
         definition: paymentApproved
       bindings:
@@ -23,6 +27,19 @@ spring:
           destination: card.payment.approved
           group: clearing-settlement-group
           content-type: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
 
 server:
   port: 9091
+
+logging:
+  level:
+    com.card.payment: DEBUG
+
+bank:
+  service:
+    url: http://localhost:8086
+  settlement:
+    from-account: 9999999999
