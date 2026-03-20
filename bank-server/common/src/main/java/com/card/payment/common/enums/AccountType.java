@@ -5,7 +5,8 @@ package com.card.payment.common.enums;
  */
 public enum AccountType {
     CHECKING("입출금"),
-    SAVINGS("저축");
+    SAVINGS("저축"),
+    BANK_SYSTEM("은행/카드사 시스템 계좌");
     
     private final String description;
     

@@ -5,7 +5,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/bank_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
-    password: 1234
+    password: jaeha6183@
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   jpa:
