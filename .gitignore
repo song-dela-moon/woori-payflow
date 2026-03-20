@@ -1,0 +1,40 @@
+# Gradle
+.gradle
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+build/
+bin/
+
+# IntelliJ IDEA
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+.metadata/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Log
+logs/
+*.log
+
+# Sensitive Info
+application-local.yml
+.env

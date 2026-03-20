@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: clearing-settlement-service
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  cloud:
+    stream:
+      default-binder: kafka
+      function:
+        definition: paymentApproved
+      bindings:
+        paymentApproved-in-0:
+          destination: card.payment.approved
+          group: clearing-settlement-group
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: localhost:9092
+
+server:
+  port: 9091
+
+logging:
+  level:
+    com.card.payment: DEBUG
