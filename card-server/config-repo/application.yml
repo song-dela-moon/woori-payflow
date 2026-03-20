@@ -1,0 +1,18 @@
+# 공통 설정 (Kafka, Logging)
+spring:
+  cloud:
+    stream:
+      default-binder: kafka
+      kafka:
+        binder:
+          brokers: localhost:9092
+          auto-create-topics: true
+
+logging:
+  level:
+    com.card.payment: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

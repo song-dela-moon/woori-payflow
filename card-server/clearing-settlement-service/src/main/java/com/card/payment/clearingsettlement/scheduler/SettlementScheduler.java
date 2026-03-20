@@ -13,8 +13,7 @@ public class SettlementScheduler {
 
     private final SettlementService settlementService;
 
-    // 테스트용: 1분마다 실행
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 10000)   // 테스트용: 10초마다 실행
 //    @Scheduled(cron = "0 0 1 * * *")  // 운영용: 매일 새벽 1시
     public void runSettlementJob() {
         log.info("자동 정산 배치 시작");
