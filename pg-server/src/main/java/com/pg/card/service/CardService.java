@@ -9,6 +9,7 @@ import com.pg.card.mapper.CardResponseMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal; // 추가
 import java.util.Map;
 
 @Service
@@ -28,6 +29,9 @@ public class CardService {
         return cardResponseMapper.toCancelResponse(rawResponse);
     }
 
+    /**
+     * PG 내부 데이터를 카드사 명세(AuthorizationRequest) 규격에 맞게 변환하여 생성
+     */
     public CardApprovalRequest createApprovalRequest(
             String paymentId,
             String orderId,
@@ -39,11 +43,22 @@ public class CardService {
             String cardPassword2Digits,
             Integer installmentMonths
     ) {
+        String cleanCardNumber = (cardNumber != null) ? cardNumber.replaceAll("-", "") : "";
+
         return CardApprovalRequest.builder()
+                // 카드사 명세 매핑: paymentId -> transactionId
+                .transactionId(paymentId)
+                // 카드사 명세 매핑: Long -> BigDecimal
+                .amount(amount != null ? BigDecimal.valueOf(amount) : BigDecimal.ZERO)
+                // 카드사 명세 매핑: 가맹점 ID (기존 orderId나 별도 값을 merchantId로 활용)
+                .merchantId("MERCHANT-001") // 실제 연동 시에는 가맹점 식별자를 넘겨야 함
+                .cardNumber(cleanCardNumber)
+                // 카드사 명세 필드 (기본값 세팅)
+                .terminalId("TERMINAL-001")
+                .pin(cardPassword2Digits) // PIN으로 활용
+
                 .paymentId(paymentId)
                 .orderId(orderId)
-                .amount(amount)
-                .cardNumber(cardNumber)
                 .expiryYear(expiryYear)
                 .expiryMonth(expiryMonth)
                 .birthOrBizNo(birthOrBizNo)
