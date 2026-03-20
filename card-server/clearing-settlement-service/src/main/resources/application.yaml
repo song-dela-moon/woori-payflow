@@ -37,3 +37,9 @@ server:
 logging:
   level:
     com.card.payment: DEBUG
+
+bank:
+  service:
+    url: http://localhost:8086
+  settlement:
+    from-account: 9999999999

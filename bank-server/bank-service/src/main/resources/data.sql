@@ -8,7 +8,8 @@ INSERT INTO accounts (id, account_number, bank_code, account_type, account_statu
 (4, '4000000001', '001', 'CHECKING', 'ACTIVE', 3000000.00, 0.00, 'CUST-004', NOW(), 0),
 (5, '5000000001', '001', 'CHECKING', 'ACTIVE', 100000.00, 0.00, 'CUST-005', NOW(), 0),
 (6, '6000000001', '001', 'CHECKING', 'ACTIVE', 500000.00, 0.00, 'CUST-006', NOW(), 0),
-(7, '7000000001', '001', 'CHECKING', 'ACTIVE', 200000.00, 0.00, 'CUST-007', NOW(), 0);
+(7, '7000000001', '001', 'CHECKING', 'ACTIVE', 200000.00, 0.00, 'CUST-007', NOW(), 0),
+(8, '9999999999', '001', 'BANK_SYSTEM', 'ACTIVE', 100000000.00, 0.00, 'CARD-COMPANY', NOW(), 0);
 
 -- 카드-계좌 매핑 데이터 삽입
 -- Luhn 알고리즘을 통과하는 유효한 테스트 카드 번호 사용
