@@ -9,13 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PgPaymentRequest {
+public class PgApprovePaymentRequest {
 
-    private String merchantId;
-    private String orderId;
-    private String productName;
-    private Long amount;
-
+    private String paymentUid;
     private String cardNumber;
     private String expiryYear;
     private String expiryMonth;

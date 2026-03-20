@@ -5,10 +5,14 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class PgPaymentResponse {
+public class PgApprovePaymentResponse {
 
-    private String paymentId;
+    private String paymentUid;
+    private String orderId;
+    private String productName;
+    private Long amount;
     private String status;
+    private String paymentMethod;
     private String approvalCode;
     private String failureCode;
     private String failureMessage;

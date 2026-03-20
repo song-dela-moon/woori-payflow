@@ -4,15 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.merchant.order.repository.OrderRepository;
 import com.merchant.payment.client.PgClient;
-import com.merchant.payment.dto.PgPaymentResponse;
+import com.merchant.payment.dto.PgApprovePaymentResponse;
+import com.merchant.payment.dto.PgCreatePaymentResponse;
 import com.merchant.payment.repository.MerchantPaymentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -85,14 +86,29 @@ class MerchantServerApplicationTests {
 
         String orderUid = createOrder("노트북 거치대", 32000L);
 
-        PgPaymentResponse approvedResponse = new PgPaymentResponseFixture(
-                "PG-APPROVED-001",
-                "APPROVED",
-                "AP-123456",
-                null,
-                null
-        ).toResponse();
-        given(pgClient.requestPaymentApproval(any())).willReturn(approvedResponse);
+        given(pgClient.createPayment(any())).willReturn(
+                new PgCreatePaymentResponseFixture(
+                        "PG-APPROVED-001",
+                        orderUid,
+                        "노트북 거치대",
+                        32000L,
+                        "READY",
+                        "CARD"
+                ).toResponse()
+        );
+        given(pgClient.approvePayment(any())).willReturn(
+                new PgApprovePaymentResponseFixture(
+                        "PG-APPROVED-001",
+                        orderUid,
+                        "노트북 거치대",
+                        32000L,
+                        "SUCCESS",
+                        "CARD",
+                        "AP-123456",
+                        null,
+                        null
+                ).toResponse()
+        );
 
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -125,14 +141,29 @@ class MerchantServerApplicationTests {
 
         String orderUid = createOrder("무선 마우스", 54000L);
 
-        PgPaymentResponse failedResponse = new PgPaymentResponseFixture(
-                "PG-FAILED-001",
-                "FAILED",
-                null,
-                "CARD_DECLINED",
-                "한도 초과"
-        ).toResponse();
-        given(pgClient.requestPaymentApproval(any())).willReturn(failedResponse);
+        given(pgClient.createPayment(any())).willReturn(
+                new PgCreatePaymentResponseFixture(
+                        "PG-FAILED-001",
+                        orderUid,
+                        "무선 마우스",
+                        54000L,
+                        "READY",
+                        "CARD"
+                ).toResponse()
+        );
+        given(pgClient.approvePayment(any())).willReturn(
+                new PgApprovePaymentResponseFixture(
+                        "PG-FAILED-001",
+                        orderUid,
+                        "무선 마우스",
+                        54000L,
+                        "FAIL",
+                        "CARD",
+                        null,
+                        "CARD_DECLINED",
+                        "한도 초과"
+                ).toResponse()
+        );
 
         mockMvc.perform(post("/payments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -176,35 +207,76 @@ class MerchantServerApplicationTests {
         return objectMapper.readTree(response).get("orderUid").asText();
     }
 
-    private record PgPaymentResponseFixture(
-            String paymentId,
+    private record PgCreatePaymentResponseFixture(
+            String paymentUid,
+            String orderId,
+            String productName,
+            Long amount,
             String status,
+            String paymentMethod
+    ) {
+        private PgCreatePaymentResponse toResponse() throws Exception {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue("""
+                    {
+                      "paymentUid": "%s",
+                      "orderId": "%s",
+                      "productName": "%s",
+                      "amount": %d,
+                      "status": "%s",
+                      "paymentMethod": "%s"
+                    }
+                    """.formatted(
+                    paymentUid,
+                    orderId,
+                    productName,
+                    amount,
+                    status,
+                    paymentMethod
+            ), PgCreatePaymentResponse.class);
+        }
+    }
+
+    private record PgApprovePaymentResponseFixture(
+            String paymentUid,
+            String orderId,
+            String productName,
+            Long amount,
+            String status,
+            String paymentMethod,
             String approvalCode,
             String failureCode,
             String failureMessage
     ) {
-        private PgPaymentResponse toResponse() throws Exception {
+        private PgApprovePaymentResponse toResponse() throws Exception {
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue("""
                     {
-                      "paymentId": "%s",
+                      "paymentUid": "%s",
+                      "orderId": "%s",
+                      "productName": "%s",
+                      "amount": %d,
                       "status": "%s",
+                      "paymentMethod": "%s",
                       "approvalCode": %s,
                       "failureCode": %s,
                       "failureMessage": %s
                     }
                     """.formatted(
-                    paymentId,
+                    paymentUid,
+                    orderId,
+                    productName,
+                    amount,
                     status,
+                    paymentMethod,
                     nullableJsonValue(approvalCode),
                     nullableJsonValue(failureCode),
                     nullableJsonValue(failureMessage)
-            ), PgPaymentResponse.class);
+            ), PgApprovePaymentResponse.class);
         }
 
         private String nullableJsonValue(String value) {
             return value == null ? "null" : "\"%s\"".formatted(value);
         }
     }
-
 }

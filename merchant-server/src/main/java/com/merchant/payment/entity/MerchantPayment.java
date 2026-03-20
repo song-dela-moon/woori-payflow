@@ -93,6 +93,11 @@ public class MerchantPayment {
         this.requestedAt = LocalDateTime.now();
     }
 
+    public void markRequested(String pgPaymentId) {
+        this.pgPaymentId = pgPaymentId;
+        markRequested();
+    }
+
     public void markApproved(String pgPaymentId, String approvalCode) {
         this.pgPaymentId = pgPaymentId;
         this.approvalCode = approvalCode;
@@ -105,6 +110,12 @@ public class MerchantPayment {
         this.failureCode = failureCode;
         this.failureMessage = failureMessage;
         this.paymentStatus = PaymentStatus.FAILED;
+        this.respondedAt = LocalDateTime.now();
+    }
+
+    public void markCanceled(String pgPaymentId) {
+        this.pgPaymentId = pgPaymentId;
+        this.paymentStatus = PaymentStatus.CANCELED;
         this.respondedAt = LocalDateTime.now();
     }
 }
