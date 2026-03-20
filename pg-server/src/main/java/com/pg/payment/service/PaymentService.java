@@ -44,7 +44,8 @@ public class PaymentService {
                 request.getExpiryMonth(),
                 request.getBirthOrBizNo(),
                 request.getCardPassword2Digits(),
-                request.getInstallmentMonths()
+                request.getInstallmentMonths(),
+                payment.getMerchant().getMerchantUid()
         );
 
         try {

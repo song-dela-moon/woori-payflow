@@ -47,10 +47,10 @@ public class SettlementService {
             String merchantId = entry.getKey();
             List<ClearingTransaction> transactions = entry.getValue();
 
-            if (settlementRepository.findByMerchantIdAndBusinessDate(merchantId, businessDate).isPresent()) {
-                log.warn("이미 정산이 생성된 merchantId={}, businessDate={}", merchantId, businessDate);
-                continue;
-            }
+//            if (settlementRepository.findByMerchantIdAndBusinessDate(merchantId, businessDate).isPresent()) {
+//                log.warn("이미 정산이 생성된 merchantId={}, businessDate={}", merchantId, businessDate);
+//                continue;
+//            }
 
             BigDecimal grossAmount = transactions.stream()
                     .map(ClearingTransaction::getEffectiveAmount)

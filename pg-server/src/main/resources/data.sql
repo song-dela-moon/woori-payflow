@@ -7,7 +7,7 @@ INSERT INTO merchant (
     created_at,
     updated_at
 ) VALUES (
-             'MRC-001',
+             'M001',
              'test-merchant',
              'test-api-key-001',
              'http://localhost:8081/api/webhook/payment',

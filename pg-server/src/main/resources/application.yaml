@@ -7,7 +7,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
@@ -15,10 +15,17 @@ spring:
 
   sql:
     init:
-      mode: never
+      mode: never # Changed from 'never' to 'always' to create tables
+
+server:
+  port: 8090
 
 card:
   company:
     base-url: http://localhost:9090
-    approve-path: /api/cards/approve
+    approve-path: /api/authorization/request
     cancel-path: /api/cards/cancel
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: TRACE

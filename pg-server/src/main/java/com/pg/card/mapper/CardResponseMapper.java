@@ -2,20 +2,23 @@ package com.pg.card.mapper;
 
 import com.pg.card.dto.CardApprovalResponse;
 import com.pg.card.dto.CardCancelResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class CardResponseMapper {
 
     public CardApprovalResponse toApprovalResponse(Map<String, Object> raw) {
+        log.info("Mapping Card Approval Response: {}", raw);
         return CardApprovalResponse.builder()
-                .success(asBoolean(raw.get("success")))
-                .code(asString(raw.get("code")))
+                .success(asBoolean(raw.get("approved"))) // Card Service uses 'approved'
+                .code(asString(raw.get("responseCode"))) // Card Service uses 'responseCode'
                 .message(asString(raw.get("message")))
-                .approvalCode(asString(raw.get("approvalCode")))
-                .approvedAt(asString(raw.get("approvedAt")))
+                .approvalCode(asString(raw.get("approvalNumber"))) // Card Service uses 'approvalNumber'
+                .approvedAt(asString(raw.get("authorizationDate"))) // Card Service uses 'authorizationDate'
                 .build();
     }
 

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PgPaymentRequest {
 
-    private String merchantId;
+    private String merchantUid;
     private String orderId;
     private String productName;
     private Long amount;
@@ -22,4 +22,7 @@ public class PgPaymentRequest {
     private String birthOrBizNo;
     private String cardPassword2Digits;
     private Integer installmentMonths;
+
+    private String apiKey;       // Added for PG creation
+    private String paymentMethod; // Added for PG creation
 }

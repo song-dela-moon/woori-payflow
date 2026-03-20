@@ -27,7 +27,6 @@ public class CardService {
         Map<String, Object> rawResponse = cardCompanyClient.requestCancel(request);
         return cardResponseMapper.toCancelResponse(rawResponse);
     }
-
     public CardApprovalRequest createApprovalRequest(
             String paymentId,
             String orderId,
@@ -37,7 +36,8 @@ public class CardService {
             String expiryMonth,
             String birthOrBizNo,
             String cardPassword2Digits,
-            Integer installmentMonths
+            Integer installmentMonths,
+            String merchantUid
     ) {
         return CardApprovalRequest.builder()
                 .paymentId(paymentId)
@@ -49,6 +49,7 @@ public class CardService {
                 .birthOrBizNo(birthOrBizNo)
                 .cardPassword2Digits(cardPassword2Digits)
                 .installmentMonths(installmentMonths)
+                .merchantUid(merchantUid)
                 .build();
     }
 

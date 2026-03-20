@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class PaymentService {
 
-    private static final String MERCHANT_ID = "MRC-001";
+    private static final String MERCHANT_ID = "M001";
 
     private final OrderRepository orderRepository;
     private final MerchantPaymentRepository merchantPaymentRepository;
@@ -37,7 +37,7 @@ public class PaymentService {
         order.changeStatus(OrderStatus.PAYMENT_REQUESTED);
 
         PgPaymentRequest pgRequest = PgPaymentRequest.builder()
-                .merchantId(MERCHANT_ID)
+                .merchantUid(MERCHANT_ID)
                 .orderId(order.getOrderUid())
                 .productName(order.getProductName())
                 .amount(order.getAmount())
@@ -47,19 +47,27 @@ public class PaymentService {
                 .birthOrBizNo(request.getBirthOrBizNo())
                 .cardPassword2Digits(request.getCardPassword2Digits())
                 .installmentMonths(request.getInstallmentMonths())
+                // 가맹점 정보 및 API Key 추가
+                .apiKey("test-api-key-001")
+                .paymentMethod("CARD")
                 .build();
 
-        PgPaymentResponse pgResponse = pgClient.requestPaymentApproval(pgRequest);
+        // 1. PG사에 결제 생성 요청 (TID 발급)
+        PgPaymentResponse createResponse = pgClient.createPayment(pgRequest);
+        String tid = createResponse.getPaymentUid();
 
-        if ("APPROVED".equalsIgnoreCase(pgResponse.getStatus())) {
+        // 2. PG사에 결제 승인 요청 (TID 포함)
+        PgPaymentResponse pgResponse = pgClient.requestPaymentApproval(pgRequest, tid);
+
+        if ("APPROVED".equalsIgnoreCase(pgResponse.getStatus()) || "SUCCESS".equalsIgnoreCase(pgResponse.getStatus())) {
             merchantPayment.markApproved(
-                    pgResponse.getPaymentId(),
+                    pgResponse.getPaymentUid(),
                     pgResponse.getApprovalCode()
             );
             order.changeStatus(OrderStatus.PAYMENT_COMPLETED);
         } else {
             merchantPayment.markFailed(
-                    pgResponse.getPaymentId(),
+                    pgResponse.getPaymentUid(),
                     pgResponse.getFailureCode(),
                     pgResponse.getFailureMessage()
             );

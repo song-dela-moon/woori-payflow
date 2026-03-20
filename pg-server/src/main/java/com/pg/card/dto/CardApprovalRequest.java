@@ -14,6 +14,7 @@ public class CardApprovalRequest {
     private String paymentId;
     private String orderId;
     private Long amount;
+    private String merchantUid;
 
     private String cardNumber;
     private String expiryYear;
