@@ -22,6 +22,9 @@ public class CardApprovalRequest {
     // 2. 기존 로직 유지용 (오류 방지)
     private String paymentId;
     private String orderId;
+    private Long amount;
+    private String merchantUid;
+
     private String cardNumber;
     private String expiryYear;
     private String expiryMonth;

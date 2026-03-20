@@ -40,7 +40,7 @@ server:
 
 bank:
   service:
-    url: http://localhost:8080
+    url: http://localhost:8086
 
 springdoc:
   api-docs:

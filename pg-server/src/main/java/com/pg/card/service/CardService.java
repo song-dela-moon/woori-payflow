@@ -28,10 +28,6 @@ public class CardService {
         Map<String, Object> rawResponse = cardCompanyClient.requestCancel(request);
         return cardResponseMapper.toCancelResponse(rawResponse);
     }
-
-    /**
-     * PG 내부 데이터를 카드사 명세(AuthorizationRequest) 규격에 맞게 변환하여 생성
-     */
     public CardApprovalRequest createApprovalRequest(
             String paymentId,
             String orderId,
@@ -41,7 +37,8 @@ public class CardService {
             String expiryMonth,
             String birthOrBizNo,
             String cardPassword2Digits,
-            Integer installmentMonths
+            Integer installmentMonths,
+            String merchantUid
     ) {
         String cleanCardNumber = (cardNumber != null) ? cardNumber.replaceAll("-", "") : "";
 
@@ -64,6 +61,7 @@ public class CardService {
                 .birthOrBizNo(birthOrBizNo)
                 .cardPassword2Digits(cardPassword2Digits)
                 .installmentMonths(installmentMonths)
+                .merchantUid(merchantUid)
                 .build();
     }
 

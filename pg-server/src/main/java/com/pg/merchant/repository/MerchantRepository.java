@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface MerchantRepository extends JpaRepository<Merchant, Long> {
     // 가맹점 식별자로 조회
-    Optional<Merchant> findByMerchantUid(String mechantUid);
+    Optional<Merchant> findByMerchantUid(String merchantUid);
 
     // API Key 존재 여부 확인
     Optional<Merchant> findByApiKey(String apiKey);
