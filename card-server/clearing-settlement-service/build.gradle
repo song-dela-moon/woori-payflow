@@ -46,6 +46,10 @@ dependencies {
 	// Spring Cloud Stream
 	implementation 'org.springframework.cloud:spring-cloud-stream'
 	implementation 'org.springframework.cloud:spring-cloud-stream-binder-kafka'
+
+	// Spring Cloud MSA
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-config'
 }
 
 dependencyManagement {
