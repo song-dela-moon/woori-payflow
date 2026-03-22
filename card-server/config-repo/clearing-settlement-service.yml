@@ -3,7 +3,7 @@ spring:
     name: clearing-settlement-service
 
   datasource:
-    url: jdbc:mysql://localhost:3306/card_authorization_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://localhost:3306/clearing_settlement_db?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: root
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver

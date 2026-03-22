@@ -33,7 +33,7 @@ public class BankClientImpl implements BankClient {
     private final RestClient balanceRestClient;
     private final RestClient debitRestClient;
     
-    public BankClientImpl(@Value("${bank.service.url:http://localhost:8080}") String bankServiceUrl) {
+    public BankClientImpl(@Value("${bank.service.url:http://localhost:8086}") String bankServiceUrl) {
         // 잔액 조회용 RestClient (타임아웃: 10초)
         JdkClientHttpRequestFactory balanceRequestFactory = new JdkClientHttpRequestFactory();
         balanceRequestFactory.setReadTimeout(BALANCE_TIMEOUT);

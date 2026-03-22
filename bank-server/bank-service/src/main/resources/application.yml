@@ -49,3 +49,7 @@ springdoc:
     enabled: true
     operations-sorter: alpha
     tags-sorter: alpha
+
+bank:
+  settlement:
+    account-number: 9999999999

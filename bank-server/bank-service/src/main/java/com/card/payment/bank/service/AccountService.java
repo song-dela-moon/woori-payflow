@@ -11,6 +11,7 @@ import com.card.payment.common.enums.MappingStatus;
 import com.card.payment.common.enums.TransactionType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,9 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final CardAccountMappingRepository cardAccountMappingRepository;
     private final TransactionRepository transactionRepository;
+
+    @Value("${bank.settlement.account-number:9999999999}")
+    private String settlementAccountNumber;
     
     /**
      * 카드 번호로 계좌 조회
@@ -146,64 +150,98 @@ public class AccountService {
         if (cardNumber == null || cardNumber.trim().isEmpty()) {
             throw new IllegalArgumentException("카드 번호는 필수입니다");
         }
-        
+
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("출금 금액은 0보다 커야 합니다");
         }
-        
+
         log.info("출금 처리 시작: cardNumber={}, amount={}, referenceId={}", cardNumber, amount, referenceId);
-        
-        // 카드 번호로 계좌 조회
+
+        // 1. 카드 번호로 사용자 계좌 매핑 조회
         CardAccountMapping mapping = cardAccountMappingRepository
                 .findByCardNumberAndStatus(cardNumber, MappingStatus.ACTIVE)
                 .orElseThrow(() -> new IllegalStateException("활성 상태의 카드-계좌 매핑을 찾을 수 없습니다"));
-        
-        // 비관적 락을 사용하여 계좌 조회 (동시성 제어)
-        Account account = accountRepository
+
+        // 2. 사용자 계좌 락 조회
+        Account userAccount = accountRepository
                 .findByAccountNumberWithLock(mapping.getAccountNumber())
                 .orElseThrow(() -> new IllegalStateException("계좌를 찾을 수 없습니다: " + mapping.getAccountNumber()));
-        
-        // 계좌 상태 확인
-        if (account.getAccountStatus() != AccountStatus.ACTIVE) {
-            throw new IllegalStateException("계좌 상태가 정상이 아닙니다: " + account.getAccountStatus());
+
+        // 3. BANK_SYSTEM 계좌 락 조회
+        Account settlementAccount = accountRepository
+                .findByAccountNumberWithLock(settlementAccountNumber)
+                .orElseThrow(() -> new IllegalStateException("정산 계좌를 찾을 수 없습니다: " + settlementAccountNumber));
+
+        // 4. 상태 확인
+        if (userAccount.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new IllegalStateException("사용자 계좌 상태가 정상이 아닙니다: " + userAccount.getAccountStatus());
         }
-        
-        // 출금 가능 금액 확인
-        BigDecimal availableBalance = calculateAvailableBalance(account);
+
+        if (settlementAccount.getAccountStatus() != AccountStatus.ACTIVE) {
+            throw new IllegalStateException("정산 계좌 상태가 정상이 아닙니다: " + settlementAccount.getAccountStatus());
+        }
+
+        // 5. 사용자 계좌 출금 가능 금액 확인
+        BigDecimal availableBalance = calculateAvailableBalance(userAccount);
         if (amount.compareTo(availableBalance) > 0) {
             log.warn("출금 가능 금액 부족: requestAmount={}, availableBalance={}", amount, availableBalance);
             throw new IllegalStateException("출금 가능 금액이 부족합니다");
         }
-        
-        // 잔액 차감
-        account.debit(amount);
-        accountRepository.save(account);
-        
-        // 거래 내역 저장
-        String transactionId = generateTransactionId();
-        Transaction transaction = Transaction.builder()
-                .transactionId(transactionId)
-                .accountNumber(account.getAccountNumber())
+
+        // 6. 사용자 계좌 출금
+        userAccount.debit(amount);
+        accountRepository.save(userAccount);
+
+        // 7. BANK_SYSTEM 계좌 입금
+        settlementAccount.credit(amount);
+        accountRepository.save(settlementAccount);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // 8. 사용자 출금 거래 내역 저장
+        String userTxnId = generateTransactionId();
+        Transaction userDebitTransaction = Transaction.builder()
+                .transactionId(userTxnId)
+                .accountNumber(userAccount.getAccountNumber())
                 .transactionType(TransactionType.DEBIT)
                 .amount(amount)
-                .balanceAfter(account.getBalance())
+                .balanceAfter(userAccount.getBalance())
                 .referenceId(referenceId)
-                .description("카드 결제 출금")
-                .transactionDate(LocalDateTime.now())
+                .description("체크카드 결제 출금 -> 정산계좌 이동")
+                .transactionDate(now)
                 .build();
-        
-        transactionRepository.save(transaction);
-        
-        log.info("출금 처리 완료: transactionId={}, accountNumber={}, amount={}, balanceAfter={}", 
-                transactionId, account.getAccountNumber(), amount, account.getBalance());
-        
+        transactionRepository.save(userDebitTransaction);
+
+        // 9. BANK_SYSTEM 입금 거래 내역 저장
+        String settlementTxnId = generateTransactionId();
+        Transaction settlementCreditTransaction = Transaction.builder()
+                .transactionId(settlementTxnId)
+                .accountNumber(settlementAccount.getAccountNumber())
+                .transactionType(TransactionType.CREDIT) // CREDIT 없으면 TRANSFER로 바꿔도 됨
+                .amount(amount)
+                .balanceAfter(settlementAccount.getBalance())
+                .referenceId(referenceId)
+                .description("체크카드 결제금 수납 <- 사용자계좌 유입")
+                .transactionDate(now)
+                .build();
+        transactionRepository.save(settlementCreditTransaction);
+
+        log.info(
+                "출금 처리 완료: userAccount={}, settlementAccount={}, amount={}, userBalanceAfter={}, settlementBalanceAfter={}",
+                userAccount.getAccountNumber(),
+                settlementAccount.getAccountNumber(),
+                amount,
+                userAccount.getBalance(),
+                settlementAccount.getBalance()
+        );
+
         return DebitResult.builder()
                 .success(true)
-                .transactionId(transactionId)
-                .accountNumber(account.getAccountNumber())
+                .transactionId(userTxnId)
+                .accountNumber(userAccount.getAccountNumber())
                 .amount(amount)
-                .balanceAfter(account.getBalance())
-                .transactionDate(transaction.getTransactionDate())
+                .balanceAfter(userAccount.getBalance())
+                .transactionDate(now)
                 .build();
     }
     
