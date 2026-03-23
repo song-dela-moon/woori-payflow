@@ -15,7 +15,7 @@ spring:
 
   sql:
     init:
-      mode: never # Changed from 'never' to 'always' to create tables
+      mode: always
 
 server:
   port: 8090
