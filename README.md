@@ -202,4 +202,3 @@ Webhook → Merchant
 
 Eureka 기반 서비스 디스커버리와 API Gateway를 적용하여  
 서비스 간 결합도를 낮추고 확장성과 유연성을 확보한 MSA 아키텍처
-```
