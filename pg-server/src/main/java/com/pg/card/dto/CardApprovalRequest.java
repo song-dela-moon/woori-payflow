@@ -15,14 +15,13 @@ public class CardApprovalRequest {
     // 1. 카드사 전송용 (명세 일치)
     private String transactionId;
     private String merchantId;
-    private BigDecimal amount;    // 카드사는 BigDecimal을 원함
+    private BigDecimal amount;
     private String terminalId;
     private String pin;
 
     // 2. 기존 로직 유지용 (오류 방지)
     private String paymentId;
     private String orderId;
-    private Long amount;
     private String merchantUid;
 
     private String cardNumber;
