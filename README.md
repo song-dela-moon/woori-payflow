@@ -1,4 +1,3 @@
-```markdown
 # 🚀 MSA 완성형 구조 (Eureka + API Gateway)
 
 본 프로젝트는 **Spring Cloud 기반 MSA 구조**를 적용하여  
